@@ -8,7 +8,8 @@ some scripts to deal with picture with PIL
 一些资料，先备记在这里：
 ============================
 
-.. `PIL 官方文档 <http://www.pythonware.com/library/pil/handbook/index.htm>`_
+PIL官方文档 `a link`_.
+.. `_a link`: <http://www.pythonware.com/library/pil/handbook/index.htm
 
 .. `Lion下安装PIL1.1.7`：http://davidx.me/2011/12/11/lion%E4%B8%8B%E5%AE%89%E8%A3%85pil1-1-7/
 
