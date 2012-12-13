@@ -6,12 +6,21 @@ watermark
 libjpeg
 lzlib
 freetype
+
+PIL能取到图片的metadata信息，但是在保存时会丢掉这些信息，PIL没有好的解决办法。
+于是安装了pyexiv2库。
+mac 下安装方法：
+https://gist.github.com/819680
+
+注意pyexiv2的api接口有变化，采用新文档
+http://tilloy.net/dev/pyexiv2/tutorial.html#reading-and-writing-exif-tags
 """
 
 import sys
 from cStringIO import StringIO
 import Image, ImageDraw, ImageFont
 from ExifTags import TAGS
+import pyexiv2
 
 
 def picopen(image):
@@ -28,6 +37,7 @@ def picopen(image):
             print e
             return
 
+    print "mode", im.mode
 
     if im.mode == 'RGBA':
         p = Image.new('RGBA', im.size, 'white')
@@ -53,6 +63,21 @@ def picopen(image):
 
     return im
 
+def copy_image_metadata(source_file, dest_file):
+    source_metadata = pyexiv2.ImageMetadata(source_file)
+    source_metadata.read()
+
+    dest_metadata = pyexiv2.ImageMetadata(dest_file)
+    dest_metadata.read()
+
+    for key in source_metadata.exif_keys:
+        tag = source_metadata[key]
+        try:
+            dest_metadata[key] = pyexiv2.ExifTag(key, tag.value)
+        except:
+            pass
+
+    dest_metadata.write()
 
 def watermark_use_text(im, text, outfile, pos_x=0, pos_y=0, fonttype="", fontsize=60, fontcolor=(0,0,0)):
     if not hasattr(im, 'getim'): # a PIL Image object
@@ -101,6 +126,7 @@ def handler(source_file, target_file, text=None):
     pos_x = im.size[0] * 0.75
     pos_y = im.size[1] * 0.8
     watermark_use_text(im, text, target_file, pos_x=pos_x, pos_y=pos_y, fonttype=fonttype, fontsize=fontsize, fontcolor=fontcolor)
+    copy_image_metadata(source_file, target_file)
 
 
 if __name__ == "__main__":
@@ -112,4 +138,5 @@ if __name__ == "__main__":
         if len(argv) == 4:
             text = argv[3]
         handler(source_file, target_file, text)
-        handler(source_file, target_file, text)
+        ##handler(source_file, target_file, text)
+
